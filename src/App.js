@@ -4,6 +4,7 @@ import "./App.css";
 import { AiOutlineDelete } from "react-icons/ai";
 import { MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { BsCheckLg } from "react-icons/bs";
+
 function App() {
   const [allTodos, setAllTodos] = useState([]);
   const [newTodoTitle, setNewTodoTitle] = useState("");
@@ -12,6 +13,41 @@ function App() {
   const [notcompletedTasks, setNotCompletedTasks] = useState([]);
   const [completedTodos, setCompletedTodos] = useState([]);
   const [isCompletedScreen, setIsCompletedScreen] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedIndex, setEditedIndex] = useState(null);
+
+  const handleEdit = (index) => {
+    setNewTodoTitle(allTodos[index].title);
+    setNewDescription(allTodos[index].description);
+    setIsEditing(true);
+    setEditedIndex(index);
+  };
+
+  const handleSaveEdit = () => {
+    if (newTodoTitle === "") {
+      alert("Enter Title Field");
+    } else if (newDescription === "") {
+      alert("Enter Description field");
+    } else {
+      let updatedTodoArr = [...allTodos];
+      updatedTodoArr[editedIndex] = {
+        title: newTodoTitle,
+        description: newDescription,
+        completed: updatedTodoArr[editedIndex].completed,
+      };
+      setAllTodos(updatedTodoArr);
+      localStorage.setItem("todolist", JSON.stringify(updatedTodoArr));
+      setNewDescription("");
+      setNewTodoTitle("");
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setNewTodoTitle("");
+    setNewDescription("");
+  };
 
   const handleAddNewToDo = () => {
     if (newTodoTitle == "") alert("Enter Title Field");
@@ -127,10 +163,10 @@ function App() {
   };
 
   const navigate = useNavigate();
-  const openTask = (index) => {
-    localStorage.setItem("selectedIndex", index);
-    navigate("./task");
-  };
+  // const openTask = (index) => {
+  //   localStorage.setItem("selectedIndex", index);
+  //   navigate("./task");
+  // };
 
   return (
     <div className="App">
@@ -191,7 +227,7 @@ function App() {
             allTodos.map((item, index) => (
               <div className="todo-list-item" key={index}>
                 <div>
-                  <h3 class="title_onHover" onClick={() => openTask(index)}>{item.title}</h3>
+                  <h3 class="title_onHover">{item.title}</h3>
                   <p>{item.description}</p>
                 </div>
                 <div>
@@ -213,6 +249,12 @@ function App() {
                       onClick={() => checked(index)}
                     />
                   )}
+                  <button
+                    onClick={() => handleEdit(index)}
+                    className="edit-btn"
+                  >
+                    Edit
+                  </button>
                 </div>
               </div>
             ))}
@@ -263,6 +305,41 @@ function App() {
             )}
         </div>
       </div>
+      {isEditing && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h5 className="modal-title">Edit Task</h5>
+            </div>
+            <div className="modal-body">
+              <label>Title:</label>
+              <input
+                type="text"
+                value={newTodoTitle}
+                onChange={(e) => setNewTodoTitle(e.target.value)}
+                placeholder="Edit the title of your Task"
+              />
+              <br />
+              <br />
+              <label>Description:</label>
+              <input
+                type="text"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Edit the description of your Task"
+              />
+            </div>
+            <div className="modal-footer">
+              <button className="primary-btn" onClick={handleCancelEdit}>
+                Cancel
+              </button>
+              <button className="primary-btn" onClick={handleSaveEdit}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
