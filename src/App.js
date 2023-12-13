@@ -50,8 +50,7 @@ function App() {
   };
 
   const handleAddNewToDo = () => {
-    if (newTodoTitle == "") alert("Enter Title Field");
-    else if (newDescription == "") alert("Enter Description field");
+    if (newTodoTitle == "" || newDescription == "") alert("Enter Field");
     else {
       let newToDoObj = {
         title: newTodoTitle,
@@ -90,24 +89,30 @@ function App() {
   }, []);
 
   const handleToDoDelete = (index) => {
-    let reducedTodos = [...allTodos];
-    reducedTodos.splice(index, 1);
-    // console.log (index);
-
-    // console.log (reducedTodos);
-    localStorage.setItem("todolist", JSON.stringify(reducedTodos));
-    setAllTodos(reducedTodos);
+    const updatedTodos = [...allTodos];
+    updatedTodos.splice(index, 1);
+    setAllTodos(updatedTodos);
+    localStorage.setItem("todolist", JSON.stringify(updatedTodos));
   };
 
   const handleCompletedTodoDelete = (index) => {
-    let reducedCompletedTodos = [...completedTodos];
-    reducedCompletedTodos.splice(index);
-    // console.log (reducedCompletedTodos);
+    const updatedCompletedTodos = [...completedTodos];
+    updatedCompletedTodos.splice(index, 1);
+    setCompletedTodos(updatedCompletedTodos);
     localStorage.setItem(
       "completedTodos",
-      JSON.stringify(reducedCompletedTodos)
+      JSON.stringify(updatedCompletedTodos)
     );
-    setCompletedTodos(reducedCompletedTodos);
+
+    const updatedAllTodos = allTodos.filter((task, i) => i !== index);
+    setAllTodos(updatedAllTodos);
+    localStorage.setItem("todolist", JSON.stringify(updatedAllTodos));
+  };
+
+  const handleNotCompletedTodoDelete = (index) => {
+    const updatedNotCompletedTodos = allTodos.filter((task, i) => i !== index);
+    setAllTodos(updatedNotCompletedTodos);
+    localStorage.setItem("todolist", JSON.stringify(updatedNotCompletedTodos));
   };
 
   const rchecked = (index) => {
@@ -117,37 +122,15 @@ function App() {
     setAllTodos(makeTrue);
   };
   const checked = (index) => {
-    const date = new Date();
-    var dd = date.getDate();
-    var mm = date.getMonth() + 1;
-    var yyyy = date.getFullYear();
-    var hh = date.getHours();
-    var minutes = date.getMinutes();
-    var ss = date.getSeconds();
-    var finalDate =
-      dd + "-" + mm + "-" + yyyy + " at " + hh + ":" + minutes + ":" + ss;
-
     let makeTrue = [...allTodos];
     makeTrue[index].completed = true;
-    makeTrue[index].completedOn = finalDate;
     localStorage.setItem("todolist", JSON.stringify(makeTrue));
     setAllTodos(makeTrue);
   };
 
   const handleComplete = (index) => {
-    const date = new Date();
-    var dd = date.getDate();
-    var mm = date.getMonth() + 1;
-    var yyyy = date.getFullYear();
-    var hh = date.getHours();
-    var minutes = date.getMinutes();
-    var ss = date.getSeconds();
-    var finalDate =
-      dd + "-" + mm + "-" + yyyy + " at " + hh + ":" + minutes + ":" + ss;
-
     let filteredTodo = {
       ...allTodos[index],
-      completedOn: finalDate,
     };
 
     // console.log (filteredTodo);
@@ -167,6 +150,13 @@ function App() {
   //   localStorage.setItem("selectedIndex", index);
   //   navigate("./task");
   // };
+
+  const handleNotCompletedCheckbox = (index) => {
+    const updatedNotCompletedTodos = [...allTodos];
+    updatedNotCompletedTodos[index].completed = true; // Mark the task as completed
+    setAllTodos(updatedNotCompletedTodos);
+    localStorage.setItem("todolist", JSON.stringify(updatedNotCompletedTodos));
+  };
 
   return (
     <div className="App">
@@ -268,10 +258,7 @@ function App() {
                       <div>
                         <h3>{item.title}</h3>
                         <p>{item.description}</p>
-                        <p>
-                          {" "}
-                          <i>Completed at: {item.completedOn}</i>
-                        </p>
+                        <p> {/* <i>Completed at: {item.completedOn}</i> */}</p>
                       </div>
                       <div>
                         <AiOutlineDelete
@@ -294,9 +281,27 @@ function App() {
                         <p>{item.description}</p>
                       </div>
                       <div>
+                        {/* <input
+                          type="checkbox"
+                          checked={false} // You can set the default value based on your logic
+                          onChange={() => handleNotCompletedCheckbox(index)}
+                        /> */}
+                        {item.completed && (
+                          <BsCheckLg
+                            title="Completed?"
+                            className=" check-icon"
+                            onClick={() => rchecked(index)}
+                          />
+                        )}
+                        {!item.completed && (
+                          <MdOutlineCheckBoxOutlineBlank
+                            className="check-icon"
+                            onClick={() => checked(index)}
+                          />
+                        )}
                         <AiOutlineDelete
                           className="icon"
-                          onClick={() => handleCompletedTodoDelete(index)}
+                          onClick={() => handleNotCompletedTodoDelete(index)}
                         />
                       </div>
                     </div>
